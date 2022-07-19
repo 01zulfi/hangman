@@ -1,7 +1,11 @@
 # frozen_string_literal: true
 
+require_relative './display'
+
 # module for file operations
 module FileOperations
+  include Display
+
   SAVED_GAMES_DIR_NAME = 'saved_games'
 
   def save_game(contents)
@@ -21,6 +25,7 @@ module FileOperations
   end
 
   def filename_input
+    puts_filename_input_prompt
     filename = ''
     filename = gets.chomp until filename.length > 1
     filename

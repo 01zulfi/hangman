@@ -3,19 +3,23 @@
 require_relative './hangman'
 require_relative './file_operations'
 require_relative './serialize'
+require_relative './display'
 
 # main class
 class Main
   include FileOperations
   include Serialize
+  include Display
 
   def start
+    puts_initial_prompt
     if game_mode == '1'
       Hangman.new(random_word_from_dictionary).start
     else
-      file = select_file
-      data = from_json(read_saved_game(file))
-      puts data
+      filename = select_filename
+      data = from_json(read_saved_game(filename))
+
+      puts_game_loaded
 
       Hangman.new(data['word'], data['correct'], data['incorrect']).start
     end
@@ -23,24 +27,22 @@ class Main
 
   private
 
-  def select_file
-    puts 'select file'
-    list_saved_games.each_with_index do |file_name, index|
-      puts "#{index} - #{file_name}"
-    end
+  def select_filename
+    puts_file_selection(list_saved_games)
 
-    file_number = -1
-    file_number = gets.chomp.to_i until valid_file_selection(file_number, list_saved_games.length)
-    list_saved_games[file_number]
+    file_number = ''
+    file_number = gets.chomp until valid_file_selection(file_number, list_saved_games.length)
+    list_saved_games[file_number.to_i]
   end
 
   def valid_file_selection(file_number, total_files)
-    file_number.between?(0, total_files)
+    return false if file_number.empty?
+
+    file_number.to_i.between?(0, total_files) && file_number.scan(/\D/).empty?
   end
 
   def game_mode
-    puts '1. new game'
-    puts '2. load game'
+    puts_mode_selection
 
     mode = ''
     mode = gets.chomp until valid_mode(mode)
