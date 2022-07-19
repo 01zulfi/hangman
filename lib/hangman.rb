@@ -1,9 +1,14 @@
 # frozen_string_literal: true
 
 require 'json'
+require_relative './serialize'
+require_relative './file_operations'
 
 # hangman class
 class Hangman
+  include Serialize
+  include FileOperations
+
   def initialize(word, correct = [], incorrect = [])
     @original_word = word
     @word = word.split('').uniq
@@ -16,7 +21,7 @@ class Hangman
     until game_end?
       move = player_input
       if move == 'save'
-        save_game
+        save_game(to_json({ word: @original_word, correct: @correct, incorrect: @incorrect }))
         break
       elsif @word.include?(move)
         @correct << move
@@ -31,11 +36,6 @@ class Hangman
   end
 
   private
-
-  def save_game
-    json_string = JSON.generate({ word: @original_word, correct: @correct, incorrect: @incorrect })
-    p json_string
-  end
 
   def player_input
     input = ''
